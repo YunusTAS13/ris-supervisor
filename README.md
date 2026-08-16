@@ -122,13 +122,18 @@ command per connection — the same "do one thing" philosophy as RIS's FIFO.
 
 ### Test
 
-`test/sandbox-test.sh` runs the whole thing in a scratch directory without
-touching the system: boot services, crash-restart, backoff limiter, graceful
-stop, and a clean SIGTERM shutdown of the daemon itself.
+We recommend testing in three stages — start safe, and go real only last:
 
-```bash
-bash test/sandbox-test.sh
-```
+1. **Sandbox** — `bash test/sandbox-test.sh` runs the supervision logic in a
+   scratch directory without touching the system (boot services,
+   crash-restart, backoff limiter, graceful stop, clean shutdown). Nothing
+   here is real PID 1.
+2. **QEMU/VM** — `test/build-rootfs.sh` builds a reference initramfs and
+   `test/vm-run.sh` boots it, so RIS runs as the real init in a VM. This is
+   where the mounts, devtmpfs, console and shutdown path actually run — all
+   invisible in the sandbox.
+3. **Real hardware** — only on a spare machine, never your main one. pre-beta
+   PID 1 can hang a system, and the shutdown path is hardware-dependent.
 
 ### Lint
 
@@ -144,7 +149,8 @@ ruff check
 - If `rissup` is killed and RIS respawns it, previously running services are
   reparented to PID 1 and are no longer supervised; they keep running until
   shutdown. The new instance starts the `run_at_boot` set fresh.
-- Early development stage. Test in a VM/QEMU, not on your main machine.
+- Early development stage. Follow the three-stage testing guide in the "Test"
+  section: sandbox first, then QEMU; real hardware only on a spare machine.
 
 ### Roadmap
 
@@ -281,13 +287,18 @@ socket'inden geçer — her bağlantıda bir komut; RIS'in FIFO'suyla aynı
 
 ### Test
 
-`test/sandbox-test.sh` her şeyi geçici bir dizinde, sisteme dokunmadan uçtan uca
-sınar: boot servisleri, crash-restart, backoff sınırlayıcı, nazik durdurma ve
-daemon'un kendisinin temiz SIGTERM kapanışı.
+Denemeyi üç aşamada yapmanı öneririz — önce güvenli, en son gerçek donanım:
 
-```bash
-bash test/sandbox-test.sh
-```
+1. **Sandbox** — `bash test/sandbox-test.sh` süpervizyon mantığını geçici bir
+   dizinde, sisteme dokunmadan uçtan uca sınar: boot servisleri, crash-restart,
+   backoff sınırlayıcı, nazik durdurma ve daemon'un temiz kapanışı. Burada
+   gerçek PID 1 yoktur.
+2. **QEMU/VM** — `test/build-rootfs.sh` referans initramfs'i kurar,
+   `test/vm-run.sh` onu açar, böylece RIS bir VM'de gerçek init olarak çalışır.
+   Mount'lar, devtmpfs, konsol ve kapanış akışı işte tam burada gerçekten
+   çalışır — bunların hepsi sandbox'ta görünmez.
+3. **Gerçek donanım** — yalnızca yedek bir makinede, asla ana makinede.
+   Pre-beta PID 1 sistemi kilitleyebilir ve kapanış akışı donanıma bağlıdır.
 
 ### Lint
 
@@ -303,7 +314,8 @@ ruff check
 - Eğer `rissup` öldürülür ve RIS onu yeniden doğurursa, önceden çalışan
   servisler PID 1'e reparent edilir ve artık süpervize edilmez; kapanana dek
   çalışmaya devam ederler. Yeni örnek, `run_at_boot` kümesini taze başlatır.
-- Erken geliştirme aşaması. Asıl makinenizde değil, VM/QEMU'da test edin.
+- Erken geliştirme aşaması. "Test" bölümündeki üç aşamalı test rehberini izle:
+  önce sandbox, sonra QEMU; gerçek donanım yalnızca yedek makinede.
 
 ### Yakın plan (Roadmap)
 
