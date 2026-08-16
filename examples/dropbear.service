@@ -1,0 +1,7 @@
+# Example: dropbear ssh server in the foreground (-F).
+[Service]
+exec = /usr/sbin/dropbear -E -F
+restart = always
+restart_delay = 2
+run_at_boot = true
+stop_timeout = 5

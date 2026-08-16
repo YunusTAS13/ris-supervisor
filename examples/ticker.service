@@ -1,0 +1,9 @@
+# A demo service that prints to stdout forever.
+# Its output lands in /var/log/ris/ticker.log.
+# Useful to observe restart-on-crash and log rotation.
+[Service]
+exec = /bin/sh -c 'while true; do echo tick; sleep 1; done'
+restart = always
+restart_delay = 0.5
+run_at_boot = true
+stop_timeout = 5

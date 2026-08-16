@@ -1,0 +1,9 @@
+# A service that crashes immediately and is NOT started at boot.
+# Demonstrates the on_failure policy and backoff limiter:
+# it will be restarted up to backoff_limit times, then marked dead.
+[Service]
+exec = /bin/sh -c 'echo dying; exit 3'
+restart = on_failure
+restart_delay = 0.5
+backoff_limit = 5
+run_at_boot = false

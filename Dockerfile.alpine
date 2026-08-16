@@ -1,0 +1,14 @@
+FROM python:3.11-alpine AS builder-alpine
+RUN apk add --no-cache build-base musl-dev gcc python3-dev
+RUN pip install --no-cache-dir pyinstaller
+
+WORKDIR /app
+COPY . .
+RUN pyinstaller --onedir --name rissup src/supervisor.py
+RUN pyinstaller --onefile --name risctl src/ctl.py
+
+FROM alpine:3.18
+WORKDIR /app
+COPY --from=builder-alpine /app/dist/rissup /app/rissup
+COPY --from=builder-alpine /app/dist/risctl /app/risctl
+ENTRYPOINT ["/app/rissup/rissup"]

@@ -1,0 +1,7 @@
+# Example: a getty on the first virtual console.
+# Adjust the tty and baud rate to match your hardware.
+[Service]
+exec = /usr/bin/agetty 38400 tty1 linux
+restart = always
+restart_delay = 2
+run_at_boot = true

@@ -1,0 +1,14 @@
+FROM python:3.11-slim AS builder-debian
+RUN apt-get update && apt-get install -y build-essential
+RUN pip install --no-cache-dir pyinstaller
+
+WORKDIR /app
+COPY . .
+RUN pyinstaller --onedir --name rissup src/supervisor.py
+RUN pyinstaller --onefile --name risctl src/ctl.py
+
+FROM debian:bookworm-slim
+WORKDIR /app
+COPY --from=builder-debian /app/dist/rissup /app/rissup
+COPY --from=builder-debian /app/dist/risctl /app/risctl
+ENTRYPOINT ["/app/rissup/rissup"]
