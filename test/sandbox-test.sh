@@ -39,6 +39,13 @@ run_at_boot = true
 stop_timeout = 3
 EOF
 
+cat >"${ROOT}/config/silent.service" <<'EOF'
+exec = /bin/sh -c 'echo should-not-be-logged; sleep 100'
+restart = never
+run_at_boot = true
+redirect = devnull
+EOF
+
 D="python3 src/supervisor.py --config-dir ${ROOT}/config --log-dir ${ROOT}/log --socket ${ROOT}/sock --log ${ROOT}/rissup.log"
 $D &
 DAEMON=$!
@@ -73,6 +80,11 @@ echo "== boot: ticker and never running, crashy not started"
 [ "$(field crashy state)" = stopped ] || fail "crashy should not run at boot"
 wait_for "grep -q sandboxtick ${ROOT}/log/ticker.log"
 echo "   ok (service output is being logged)"
+
+echo "== redirect devnull: silent service writes no log file"
+[ "$(field silent state)" = running ] || fail "silent not running at boot"
+[ ! -e "${ROOT}/log/silent.log" ] || fail "silent.log should not exist (redirect = devnull)"
+echo "   ok"
 
 echo "== crash-restart: SIGKILL ticker, supervisor brings it back"
 OLD=$(field ticker pid)

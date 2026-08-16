@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 RESTART_POLICIES = frozenset({"always", "on_failure", "never"})
+REDIRECT_MODES = frozenset({"log", "none", "devnull"})
 
 # A service that stays up longer than this is considered "stable",
 # and its consecutive-failure counter is reset on exit.
@@ -45,6 +46,7 @@ class Service:
     user: str | None = None
     group: str | None = None
     environment: dict[str, str] = field(default_factory=dict)
+    redirect: str = "log"  # log | none | devnull
 
     pid: int = 0
     state: str = "stopped"  # stopped | starting | running | stopping

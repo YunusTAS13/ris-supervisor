@@ -18,7 +18,7 @@ import logging
 import shlex
 from typing import TYPE_CHECKING
 
-from service import RESTART_POLICIES, Service
+from service import REDIRECT_MODES, RESTART_POLICIES, Service
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -38,6 +38,7 @@ _KNOWN_KEYS = frozenset(
         "user",
         "group",
         "environment",
+        "redirect",
     },
 )
 
@@ -81,6 +82,11 @@ def _parse_service(path: Path) -> Service:
         raise ValueError(  # noqa: TRY003
             f"invalid restart policy: {restart}",  # noqa: EM102
         )
+    redirect = values.get("redirect", "log")
+    if redirect not in REDIRECT_MODES:
+        raise ValueError(  # noqa: TRY003
+            f"invalid redirect mode: {redirect}",  # noqa: EM102
+        )
 
     return Service(
         name=path.stem,
@@ -96,6 +102,7 @@ def _parse_service(path: Path) -> Service:
         user=values.get("user") or None,
         group=values.get("group") or None,
         environment=_parse_env(values.get("environment", "")),
+        redirect=redirect,
     )
 
 

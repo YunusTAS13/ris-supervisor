@@ -96,6 +96,11 @@ umask = 022
 # group = nogroup
 # extra environment variables
 environment = FOO=bar BAZ=qux
+# what to do with the service's stdio:
+#   log     -> stdin /dev/null, stdout/stderr to /var/log/ris/<name>.log (default)
+#   none    -> keep the inherited console fds (interactive shells, e.g. console.service)
+#   devnull -> send stdin/stdout/stderr to /dev/null
+redirect = log
 ```
 
 A service is considered stable after staying up for 5 seconds; its fast-failure
@@ -140,6 +145,22 @@ ruff check
   reparented to PID 1 and are no longer supervised; they keep running until
   shutdown. The new instance starts the `run_at_boot` set fresh.
 - Early development stage. Test in a VM/QEMU, not on your main machine.
+
+### Roadmap
+
+Landing next (work in progress):
+
+- `redirect = log | none | devnull` per-service stdio policy — already in
+  `examples/console.service`, which gives an interactive login shell on the
+  VM console via `cttyhack` + `redirect = none`.
+- `test/build-rootfs.sh`: a reference initramfs rootfs builder that assembles
+  RIS + rissup + risctl (PyInstaller `--onedir`, musl/alpine when Docker is
+  available, glibc otherwise) with a static BusyBox, patches RIS to spawn
+  `/sbin/rissup`, and packs `initramfs.cpio.gz`.
+- `test/vm-run.sh` + `test/vm-test.md`: a QEMU boot smoke test
+  (`qemu-system-x86_64 -kernel ... -initrd ... -nographic`) with a
+  step-by-step verification walkthrough (console login, `risctl status`,
+  kill/auto-restart, clean shutdown).
 
 ### License & credits
 
@@ -233,6 +254,11 @@ umask = 022
 # group = nogroup
 # ekstra ortam değişkenleri
 environment = FOO=bar BAZ=qux
+# servisin stdio'su ne yapsın:
+#   log     -> stdin /dev/null, stdout/stderr /var/log/ris/<ad>.log (varsayılan)
+#   none    -> konsoldan miras alınan fd'ler kalsın (etkileşimli kabuklar, ör. console.service)
+#   devnull -> stdin/stdout/stderr /dev/null'a gitsin
+redirect = log
 ```
 
 Bir servis 5 saniye ayakta kalırsa "istikrarlı" sayılır ve hızlı-hata sayacı
@@ -278,6 +304,22 @@ ruff check
   servisler PID 1'e reparent edilir ve artık süpervize edilmez; kapanana dek
   çalışmaya devam ederler. Yeni örnek, `run_at_boot` kümesini taze başlatır.
 - Erken geliştirme aşaması. Asıl makinenizde değil, VM/QEMU'da test edin.
+
+### Yakın plan (Roadmap)
+
+Sıradakiler yolda (çalışmalar sürüyor):
+
+- `redirect = log | none | devnull` — servis bazında stdio politikası; zaten
+  `examples/console.service` içinde. Bu servis, `cttyhack` + `redirect = none`
+  ile VM konsolunda etkileşimli bir login kabuğu verir.
+- `test/build-rootfs.sh`: referans initramfs rootfs builder. RIS + rissup +
+  risctl'i (PyInstaller `--onedir`; Docker varsa musl/alpine, yoksa glibc)
+  statik BusyBox ile birleştirir, RIS'i `/sbin/rissup`'ı spawn edecek şekilde
+  yamalar ve `initramfs.cpio.gz` paketler.
+- `test/vm-run.sh` + `test/vm-test.md`: QEMU boot duman testi
+  (`qemu-system-x86_64 -kernel ... -initrd ... -nographic`) ve adım adım
+  doğrulama yönergesi (konsol girişi, `risctl status`, kill/otomatik yeniden
+  başlatma, temiz kapanış).
 
 ### Lisans ve teşekkür
 

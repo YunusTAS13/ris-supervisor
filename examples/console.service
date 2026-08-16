@@ -1,0 +1,11 @@
+# Interactive login shell on the kernel console (e.g. the QEMU virtio-serial
+# console in the reference rootfs). Uses cttyhack so the shell gets a
+# controlling terminal; stdin/stdout/stderr stay connected to the console
+# thanks to redirect = none (inherited fds).
+[Service]
+exec = /bin/cttyhack /bin/sh
+redirect = none
+restart = always
+restart_delay = 1
+run_at_boot = true
+stop_timeout = 5
